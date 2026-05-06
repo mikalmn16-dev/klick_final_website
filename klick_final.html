@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StrideShop – Laufschuhe</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2QXWR80E3Q"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2QXWR80E3Q');
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -351,6 +359,57 @@ const PRODUCTS = [
 let activeGelände='alle', activeLevel='alle';
 let cartCount=0, selectedSize=null;
 
+// ── TRACKING ──────────────────────────────────────────────
+const SHEETS_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
+const tracking={
+  startTime: Date.now(),
+  klicks: 0,
+  filterKlicks: 0,
+  detailOeffnungen: 0,
+  gesendет: false
+};
+
+function getGeraet(){
+  return /Mobi|Android/i.test(navigator.userAgent)?'Mobile':'Desktop';
+}
+
+function trackKlick(typ){
+  tracking.klicks++;
+  if(typ==='filter') tracking.filterKlicks++;
+  if(typ==='detail') tracking.detailOeffnungen++;
+  gtag('event','klick',{event_category:'Interaktion',event_label:typ});
+}
+
+function sendTracking(schuh){
+  if(tracking.gesendет) return;
+  tracking.gesendет=true;
+  const sek=Math.round((Date.now()-tracking.startTime)/1000);
+  const payload={
+    website: 'Klick-Website',
+    completion_time_sek: sek,
+    anzahl_klicks: tracking.klicks,
+    filter_klicks: tracking.filterKlicks,
+    detail_oeffnungen: tracking.detailOeffnungen,
+    erfolg: schuh?'Ja':'Nein',
+    gewaehlter_schuh: schuh||'–',
+    geraet: getGeraet()
+  };
+  // Google Analytics Event
+  gtag('event','kauf_abschluss',{
+    event_category:'Conversion',
+    event_label:schuh||'abgebrochen',
+    value: sek
+  });
+  // Google Sheets
+  fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+// Sende Tracking wenn Nutzer die Seite verlässt (ohne Kauf)
+window.addEventListener('beforeunload',()=>{
+  if(!tracking.gesendет) sendTracking(null);
+});
+// ─────────────────────────────────────────────────────────
+
 function renderCards(list){
   const g=document.getElementById('grid');
   document.getElementById('count').textContent=list.length;
@@ -374,6 +433,7 @@ function renderCards(list){
 }
 
 function applyFilters(){
+  trackKlick('filter');
   let list=PRODUCTS;
   if(activeGelände!=='alle') list=list.filter(p=>p.gelände===activeGelände);
   if(activeLevel!=='alle') list=list.filter(p=>p.level===activeLevel||(activeLevel!=='profi'&&p.level==='alle'));
@@ -383,6 +443,7 @@ function applyFilters(){
 }
 
 function setChip(el,type,val){
+  trackKlick('filter');
   const allChips=[...document.querySelectorAll('.filterbar-inner .chip')];
   allChips.forEach(c=>{ if(c.dataset.type===type) c.classList.remove('on'); });
   el.dataset.type=type;
@@ -412,6 +473,7 @@ function resetAll(){
 }
 
 function openPanel(id){
+  trackKlick('detail');
   const p=PRODUCTS.find(x=>x.id===id);
   selectedSize=null;
   document.getElementById('panel-content').innerHTML=`
@@ -441,6 +503,8 @@ function selectSize(el,s){
 
 function addToCart(name){
   if(!selectedSize){showToast('⚠️','Bitte zuerst eine Größe wählen!');return;}
+  trackKlick('kauf');
+  sendTracking(name);
   closePanel(); cartCount++;
   document.getElementById('cart-btn').textContent=`🛒 Warenkorb (${cartCount})`;
   showToast('✓',`${name} (Gr.${selectedSize}) hinzugefügt`);
