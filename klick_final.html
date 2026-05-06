@@ -366,7 +366,7 @@ const tracking={
   klicks: 0,
   filterKlicks: 0,
   detailOeffnungen: 0,
-  gesendет: false
+  gesendet: false
 };
 
 function getGeraet(){
@@ -381,8 +381,8 @@ function trackKlick(typ){
 }
 
 function sendTracking(schuh){
-  if(tracking.gesendет) return;
-  tracking.gesendет=true;
+  if(tracking.gesendet) return;
+  tracking.gesendet=true;
   const sek=Math.round((Date.now()-tracking.startTime)/1000);
   const payload={
     website: 'Klick-Website',
@@ -394,19 +394,16 @@ function sendTracking(schuh){
     gewaehlter_schuh: schuh||'–',
     geraet: getGeraet()
   };
-  // Google Analytics Event
   gtag('event','kauf_abschluss',{
     event_category:'Conversion',
     event_label:schuh||'abgebrochen',
     value: sek
   });
-  // Google Sheets
   fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload)}).catch(()=>{});
 }
 
-// Sende Tracking wenn Nutzer die Seite verlässt (ohne Kauf)
 window.addEventListener('beforeunload',()=>{
-  if(!tracking.gesendет) sendTracking(null);
+  if(!tracking.gesendet) sendTracking(null);
 });
 // ─────────────────────────────────────────────────────────
 
