@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StrideShop – KI-Berater</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2QXWR80E3Q"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2QXWR80E3Q');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0B0B0E;
+  --surface:  #131318;
+  --surface2: #1B1B22;
+  --surface3: #23232C;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #EEEEF2;
+  --muted:    #7A7A8A;
+  --muted2:   #4E4E5E;
+  --accent:   #6C63FF;
+  --accent2:  #9B95FF;
+  --accent-bg:rgba(108,99,255,0.12);
+  --accent-border:rgba(108,99,255,0.25);
+  --green:    #4ADE80;
+  --green-bg: rgba(74,222,128,0.1);
+  --amber:    #FBBF24;
+  --red:      #F87171;
+  --radius:   12px;
+  --radius-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100dvh;height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-text-size-adjust:100%}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1rem;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{font-size:1.2rem;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+.logo span{color:var(--accent2)}
+.nav-links{display:none}
+.nav-right{display:flex;align-items:center;gap:.5rem}
+.ai-pill{display:flex;align-items:center;gap:.4rem;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:20px;padding:.28rem .7rem;font-size:.68rem;font-weight:600;color:var(--accent2)}
+.ai-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.restart-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:.35rem .7rem;border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent}
+.cart-btn{background:var(--accent);color:#fff;border:none;padding:.38rem .85rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent}
+
+/* PROGRESS */
+.progress-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:.5rem 1rem;flex-shrink:0}
+.progress-bar{max-width:760px;margin:0 auto;display:flex;gap:.4rem;align-items:center}
+.progress-step{height:3px;border-radius:2px;flex:1;background:var(--surface3);transition:background .4s}
+.progress-step.done{background:var(--accent)}
+.progress-step.active{background:var(--accent2)}
+.progress-label{font-size:.65rem;color:var(--muted);margin-left:.65rem;white-space:nowrap}
+
+/* CHAT */
+.chat-area{flex:1;overflow-y:auto;overflow-x:hidden;padding:1rem .75rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.chat-area::-webkit-scrollbar{width:3px}
+.chat-area::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+
+/* MESSAGE */
+.msg{display:flex;gap:.6rem;margin-bottom:1rem;max-width:760px;margin-left:auto;margin-right:auto;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.avatar.bot{background:var(--accent-bg);border:1px solid var(--accent-border)}
+.avatar.user{background:var(--surface2);border:1px solid var(--border2)}
+.bubble{max-width:82%}
+.msg.user .bubble{text-align:right}
+.bubble-content{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) var(--radius-lg) 3px;padding:.75rem .9rem;font-size:.85rem;line-height:1.65;color:var(--text)}
+.msg.user .bubble-content{background:var(--surface2);border-color:var(--accent-border);border-radius:var(--radius-lg) var(--radius-lg) 3px var(--radius-lg)}
+.bubble-time{font-size:.58rem;color:var(--muted2);margin-top:.25rem;padding:0 .15rem}
+
+/* TYPING */
+.typing-bubble{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) var(--radius-lg) 3px;padding:.7rem .9rem;display:inline-flex;align-items:center;gap:.35rem}
+.dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:bounce 1.2s infinite}
+.dot:nth-child(2){animation-delay:.18s}
+.dot:nth-child(3){animation-delay:.36s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+
+/* QUICK REPLIES */
+.qr-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem;max-width:760px;margin-left:auto;margin-right:auto}
+.qr-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:20px;padding:.4rem .85rem;font-size:.8rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent}
+.qr-btn:hover,.qr-btn:active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent2)}
+
+/* PRODUCT CARDS IN CHAT */
+.chat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.6rem;margin-bottom:.9rem;max-width:760px;margin-left:auto;margin-right:auto}
+.chat-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:.85rem;cursor:pointer;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent}
+.chat-card:hover,.chat-card:active{border-color:var(--accent);background:var(--accent-bg)}
+.chat-card.featured{border-color:var(--accent);background:var(--accent-bg)}
+.cc-badge{font-size:.6rem;font-weight:700;background:rgba(108,99,255,.2);color:var(--accent2);border:1px solid var(--accent-border);padding:.16rem .45rem;border-radius:20px;display:inline-block;margin-bottom:.4rem}
+.cc-name{font-size:.82rem;font-weight:700;margin:.1rem 0 .3rem;line-height:1.3}
+.cc-price{font-size:.9rem;font-weight:800;color:var(--accent2)}
+.cc-match{font-size:.65rem;color:var(--green);margin-top:.25rem;font-weight:500}
+.cc-tags{display:flex;gap:.22rem;flex-wrap:wrap;margin-top:.35rem}
+.cc-tag{background:var(--surface3);color:var(--muted);font-size:.56rem;font-weight:600;padding:.12rem .4rem;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.cc-props{display:flex;flex-direction:column;gap:.28rem;margin-top:.5rem}
+.cc-prop{font-size:.68rem;font-weight:600;padding:.22rem .55rem;border-radius:6px;display:flex;align-items:center;gap:.3rem}
+.cc-prop-gelände{background:rgba(108,99,255,.15);color:var(--accent2)}
+.cc-prop-level{background:rgba(74,222,128,.12);color:var(--green)}
+.cc-prop-pron{background:rgba(251,191,36,.1);color:var(--amber)}
+
+/* DETAIL IN CHAT */
+.chat-detail{background:var(--surface);border:1px solid var(--accent-border);border-radius:var(--radius-lg);padding:1.1rem;margin-bottom:.9rem;max-width:760px;margin-left:auto;margin-right:auto}
+.cd-header{display:flex;gap:.85rem;margin-bottom:.85rem}
+.cd-emoji{font-size:2.5rem;border-radius:var(--radius);width:70px;height:70px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cd-name{font-size:1rem;font-weight:800;letter-spacing:-.3px;margin-bottom:.22rem}
+.cd-price{font-size:1.1rem;font-weight:800;color:var(--accent2);margin-bottom:.28rem}
+.cd-desc{font-size:.8rem;color:var(--muted);line-height:1.55}
+.cd-specs{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;margin:.75rem 0}
+.cd-spec{background:var(--surface2);border-radius:8px;padding:.45rem .6rem}
+.cd-spec-label{font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:.15rem}
+.cd-spec-val{font-size:.78rem;font-weight:600}
+.cd-sizes{display:flex;gap:.35rem;flex-wrap:wrap;margin:.6rem 0}
+.cd-size{border:1px solid var(--border2);border-radius:7px;padding:.4rem .6rem;font-size:.82rem;cursor:pointer;background:transparent;color:var(--text);font-family:'Outfit',sans-serif;transition:all .15s;-webkit-tap-highlight-color:transparent;min-width:42px;text-align:center}
+.cd-size:hover,.cd-size.sel{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.cd-add{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:.78rem;font-size:.92rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent}
+
+/* INPUT */
+.input-area{border-top:1px solid var(--border);background:var(--surface);padding:.75rem 1rem;padding-bottom:max(.75rem,env(safe-area-inset-bottom));flex-shrink:0}
+.input-wrap{max-width:760px;margin:0 auto;display:flex;gap:.55rem;align-items:flex-end}
+.input-box{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.65rem .9rem;font-size:16px;color:var(--text);font-family:'Outfit',sans-serif;outline:none;resize:none;min-height:42px;max-height:100px;transition:border-color .2s;-webkit-appearance:none}
+.input-box::placeholder{color:var(--muted2)}
+.input-box:focus{border-color:var(--accent)}
+.send-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:1rem;-webkit-tap-highlight-color:transparent}
+.input-hint{text-align:center;font-size:.62rem;color:var(--muted2);margin-top:.4rem;max-width:760px;margin-left:auto;margin-right:auto}
+
+/* TOAST */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:.7rem 1.1rem;border-radius:var(--radius);font-size:.85rem;z-index:999;animation:toastIn .3s ease;display:flex;align-items:center;gap:.5rem;white-space:nowrap}
+.t-ok{color:var(--green)}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Stride<span>Shop</span></div>
+  <div class="nav-links">
+    <a href="#">Laufschuhe</a>
+    <a href="#">Ausrüstung</a>
+    <a href="#">Ratgeber</a>
+    <a href="#">Sale</a>
+  </div>
+  <div class="nav-right">
+    <div class="ai-pill"><span class="ai-dot"></span>KI-Berater aktiv</div>
+    <button class="restart-btn" onclick="restartChat()">↺ Neu starten</button>
+    <button class="cart-btn" id="cart-btn">🛒 Warenkorb (0)</button>
+  </div>
+</nav>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-step active" id="ps1"></div>
+    <div class="progress-step" id="ps2"></div>
+    <div class="progress-step" id="ps3"></div>
+    <div class="progress-step" id="ps4"></div>
+    <div class="progress-step" id="ps5"></div>
+    <span class="progress-label" id="progress-label">Schritt 1 von 5</span>
+  </div>
+</div>
+
+<div class="chat-area" id="chat"></div>
+
+<div class="input-area">
+  <div class="input-wrap">
+    <textarea class="input-box" id="input-box" placeholder="Schreib deine Antwort oder wähle eine Option oben …" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" onclick="sendMsg()">➤</button>
+  </div>
+  <div class="input-hint">KI-gestützter Produktberater · Alle 30 Modelle · StrideShop 2025</div>
+</div>
+
+<script>
+const PRODUCTS=[
+  {id:1, name:'Apex Flow 3',        emoji:'👟',color:'#1A2744',price:129,rating:4.6,reviews:1243,gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'285g',sprengung:'10mm',weite:'Normal', tags:['Straße','Neutral','Mittel'],       desc:'Der Klassiker unter den Allroundern. ReactFoam-Zwischensohle kombiniert Dämpfung mit Energierückkehr – ideal für tägliche 10-km-Läufe.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:2, name:'DailyRun Pro',        emoji:'🏃',color:'#1E2D1A',price:115,rating:4.4,reviews:867, gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'mittel',  gewicht:'298g',sprengung:'12mm',weite:'Normal', tags:['Straße','Neutral','Anfänger'],      desc:'Einsteigerschuh mit komfortabler BounceCell-Sohle. Breite Zehenbox und gepolsterter Schaft für angenehmen Laufeinstieg.',sizes:[38,39,40,41,42,43,44,45]},
+  {id:3, name:'Tempo Shift',         emoji:'👟',color:'#1A1F3A',price:145,rating:4.5,reviews:632, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'271g',sprengung:'8mm', weite:'Normal', tags:['Straße','Leicht','Allround'],       desc:'Leichter Trainingsschuh mit woven mesh Obermaterial. GlideRide-Technologie fördert natürliches Abrollen.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:4, name:'CloudStep 9',         emoji:'🏃',color:'#102030',price:159,rating:4.8,reviews:1102,gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'maximal', gewicht:'263g',sprengung:'5mm', weite:'Weit',   tags:['Straße','Maximal','Komfort'],       desc:'Ultra-Weichschaum in doppelter Lage für schwebende Läufe. Geeignet für Kniebeschwerden und lange Distanzen.',sizes:[38,39,40,41,42,43,44,45,46,47]},
+  {id:5, name:'Luxe Run 2',          emoji:'👟',color:'#2A1A3A',price:189,rating:4.7,reviews:934, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'maximal', gewicht:'308g',sprengung:'6mm', weite:'Normal', tags:['Straße','Maximal','Longrun'],       desc:'Maximale Dämpfung trifft BoostCore-Technologie. Ideal für Ultraläufer und Marathon-Enthusiasten.',sizes:[40,41,42,43,44,45,46]},
+  {id:6, name:'Infinity Ride',       emoji:'🏃',color:'#1A2A2A',price:175,rating:4.6,reviews:711, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'maximal', gewicht:'295g',sprengung:'7mm', weite:'Normal', tags:['Straße','Maximal','Marathon'],      desc:'FoamTech X-Zwischensohle mit Rückstoßkante. Primeknit-Obermaterial für optimalen Sockensitz.',sizes:[40,41,42,43,44,45,46]},
+  {id:7, name:'Stable Guard 4',      emoji:'👟',color:'#1A2A1A',price:149,rating:4.5,reviews:543, gelände:'straße',   level:'alle',           pronation:'overpronation',dämpfung:'maximal', gewicht:'318g',sprengung:'10mm',weite:'Normal', tags:['Straße','Stabil','Überpronation'],  desc:'DualDensity-Mittelsohle verhindert übermäßiges Einwärtsrollen. Ideal für flache Füße.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:8, name:'Motion Fix Pro',      emoji:'🏃',color:'#2A1A1A',price:163,rating:4.4,reviews:421, gelände:'straße',   level:'alle',           pronation:'overpronation',dämpfung:'mittel',  gewicht:'305g',sprengung:'11mm',weite:'Normal', tags:['Straße','Stabil','Kontrolle'],      desc:'GuideRail-System mit verstärkter Medialseite. Schützt Knie und Hüfte vor Verletzungen.',sizes:[39,40,41,42,43,44,45]},
+  {id:9, name:'TrueStep Align',      emoji:'👟',color:'#22201A',price:155,rating:4.6,reviews:389, gelände:'straße',   level:'alle',           pronation:'overpronation',dämpfung:'maximal', gewicht:'323g',sprengung:'12mm',weite:'Weit',   tags:['Straße','Stabil','Weit'],           desc:'ErgoAlign mit drei Dichte-Zonen für natürliches Abrollen trotz Pronationstendenz.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:10,name:'Carbonix Zero',       emoji:'🏃',color:'#0D0D1F',price:269,rating:4.9,reviews:567, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'192g',sprengung:'8mm', weite:'Schmal', tags:['Wettkampf','Carbon','Elite'],       desc:'Vollcarbon-Platte mit HyperFoam-Träger. Sub-3h-Marathonschuh mit 4% Effizienzsteigerung.',sizes:[40,41,42,43,44,45]},
+  {id:11,name:'RaceDay Elite',       emoji:'👟',color:'#1F0D1A',price:249,rating:4.8,reviews:312, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'175g',sprengung:'5mm', weite:'Schmal', tags:['Wettkampf','Leicht','Speed'],       desc:'SpeedPlate Gen-2 und KevlarMesh für die schnellsten 5% der Läufer.',sizes:[40,41,42,43,44,45]},
+  {id:12,name:'Proto Sprint',        emoji:'🏃',color:'#181830',price:219,rating:4.7,reviews:245, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'208g',sprengung:'6mm', weite:'Normal', tags:['Wettkampf','Carbon','Halbmarathon'],desc:'Leichtere Carbon-Variante für Tempo-Training und Wettkämpfe bis Halbmarathon.',sizes:[40,41,42,43,44,45,46]},
+  {id:13,name:'Pace Master 5K',      emoji:'👟',color:'#1A2818',price:185,rating:4.5,reviews:412, gelände:'wettkampf',level:'alle',           pronation:'neutral',      dämpfung:'minimal', gewicht:'228g',sprengung:'7mm', weite:'Normal', tags:['Wettkampf','5K','10K'],             desc:'NitroPlate-Einlage und Mesh für reaktionsschnelle Sprints auf Kurzdistanz.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:14,name:'Grip Force 7',        emoji:'🏃',color:'#1E1A0E',price:149,rating:4.6,reviews:789, gelände:'trail',    level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'268g',sprengung:'6mm', weite:'Normal', tags:['Trail','Grip','Mittel'],            desc:'VulcanoGrip mit 6mm Multi-Terrain-Stollen. Schutzplatte gegen Felsen und Wurzeln.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:15,name:'Trail Surge',         emoji:'👟',color:'#152015',price:138,rating:4.4,reviews:521, gelände:'trail',    level:'anfänger',       pronation:'neutral',      dämpfung:'mittel',  gewicht:'289g',sprengung:'4mm', weite:'Normal', tags:['Trail','Anfänger','Einstieg'],      desc:'Einstiegs-Trailschuh mit QuadGrip-Sohle. Verstärkter Zehenkappenbereich für Stöße.',sizes:[38,39,40,41,42,43,44,45]},
+  {id:16,name:'Mudmaster X2',        emoji:'🏃',color:'#1A1A0D',price:159,rating:4.5,reviews:398, gelände:'trail',    level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'278g',sprengung:'5mm', weite:'Normal', tags:['Trail','Matsch','Wasserdicht'],     desc:'AquaShield-Membran und selbstreinigende Stollen für nasse und schlammige Bedingungen.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:17,name:'Ultra Beast 3',       emoji:'👟',color:'#20100A',price:169,rating:4.8,reviews:634, gelände:'trail',    level:'alle',           pronation:'neutral',      dämpfung:'maximal', gewicht:'302g',sprengung:'4mm', weite:'Normal', tags:['Trail','Ultra','Maximal'],          desc:'CushFoam-Dämpfung und 8mm-Stollen für 100km+ auf hartem Gelände.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:18,name:'SkyPath Pro',         emoji:'🏃',color:'#0E1820',price:178,rating:4.6,reviews:487, gelände:'trail',    level:'fortgeschritten',pronation:'neutral',      dämpfung:'maximal', gewicht:'311g',sprengung:'3mm', weite:'Normal', tags:['Trail','Berge','Alpin'],            desc:'5-Zonen-ProGrip-Sohle und Verstärkungskappe für Berge und Pässe.',sizes:[39,40,41,42,43,44,45]},
+  {id:19,name:'Trail Racer Light',   emoji:'👟',color:'#0A2010',price:155,rating:4.5,reviews:343, gelände:'trail',    level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'218g',sprengung:'6mm', weite:'Schmal', tags:['Trail','Race','Leicht'],            desc:'Carbon-Nanoweave Outsole für maximalen Grip ohne Gewichtszuschlag. Für Trail-Rennen.',sizes:[40,41,42,43,44,45]},
+  {id:20,name:'MultiSport X',        emoji:'🏃',color:'#1E1A28',price:125,rating:4.3,reviews:712, gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'mittel',  gewicht:'275g',sprengung:'8mm', weite:'Normal', tags:['Cross','Vielseitig','Sport'],       desc:'FlexZone-Schuh für alle Untergründe. Drehbares Dämpfungssystem für Indoor und Outdoor.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:21,name:'Allround Plus',       emoji:'👟',color:'#182028',price:139,rating:4.4,reviews:891, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'281g',sprengung:'9mm', weite:'Normal', tags:['Straße','Allrounder','Täglich'],    desc:'Meistgekaufter Schuh. UniversalFit-Passform für breite und schmale Füße gleichermaßen.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:22,name:'Bare Feel 2',         emoji:'🏃',color:'#201E10',price:109,rating:4.1,reviews:267, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'182g',sprengung:'4mm', weite:'Normal', tags:['Minimal','Natural','Barfuß'],       desc:'NatureFlex-Sohle mit 4mm Sprengung. Fördert Fußmuskelaktivierung – nur für Erfahrene.',sizes:[38,39,40,41,42,43,44,45]},
+  {id:23,name:'Zero Drop Elite',     emoji:'👟',color:'#1A2010',price:119,rating:4.2,reviews:198, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'196g',sprengung:'0mm', weite:'Weit',   tags:['Minimal','Zero Drop','Weit'],       desc:'Echter Zero-Drop mit WideToe Box für vollständige Barfußläufer-Erfahrung.',sizes:[39,40,41,42,43,44,45]},
+  {id:24,name:'EasyStride 4',        emoji:'🏃',color:'#101A28',price:99, rating:4.5,reviews:1456,gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'maximal', gewicht:'315g',sprengung:'14mm',weite:'Weit',   tags:['Komfort','Walking','Weich'],        desc:'Memory-Foam-Einlegesohle und extra Weichschaum für Walking und erste Jogging-Einheiten.',sizes:[37,38,39,40,41,42,43,44,45,46]},
+  {id:25,name:'SoftLand 360',        emoji:'👟',color:'#1A2820',price:112,rating:4.4,reviews:823, gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'maximal', gewicht:'320g',sprengung:'13mm',weite:'Weit',   tags:['Komfort','Polsterung','Sicher'],    desc:'Viel Seitenstabilität und Gel-Polster für ältere Läufer oder nach Verletzungspausen.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:26,name:'Interval Boost',      emoji:'🏃',color:'#0A1030',price:158,rating:4.6,reviews:534, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'225g',sprengung:'8mm', weite:'Normal', tags:['Straße','Speed','Intervall'],       desc:'ReactivePlate-Einlage für Extra-Schub im Vorfußbereich. Ideal für Tempoeinheiten.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:27,name:'Sprint Charge',       emoji:'👟',color:'#200A30',price:168,rating:4.7,reviews:445, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'215g',sprengung:'7mm', weite:'Normal', tags:['Straße','Speed','Training'],        desc:'Responsive Schaum und Nylon-Verstärkung für Tempoläufe und Speedwork.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:28,name:'FrostRun GTX',        emoji:'🏃',color:'#0E1E28',price:172,rating:4.5,reviews:312, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'305g',sprengung:'9mm', weite:'Normal', tags:['Winter','Wasserdicht','GTX'],       desc:'FrostShield-Membran und IceTrak-Gummimischung für winterliche Bedingungen.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:29,name:'RainProof Trail',     emoji:'👟',color:'#0E2818',price:143,rating:4.3,reviews:278, gelände:'trail',    level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'290g',sprengung:'5mm', weite:'Normal', tags:['Trail','Regen','Wetterfest'],       desc:'Wasserabweisendes, schnelltrocknendes Obermaterial für Laufen bei Regen.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:30,name:'Marathon Cloud X',    emoji:'🏃',color:'#280A20',price:199,rating:4.9,reviews:678, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'maximal', gewicht:'255g',sprengung:'6mm', weite:'Normal', tags:['Marathon','Maximal','Carbon'],      desc:'DualLayer NanoFoam plus Carbonplatte kombinieren Marathon-Komfort mit Rennschuh-Geschwindigkeit.',sizes:[40,41,42,43,44,45,46]},
+  {id:31,name:'Apex World Pro',      emoji:'👟',color:'#050510',price:299,rating:5.0,reviews:189, gelände:'wettkampf',level:'profi',          pronation:'neutral',      dämpfung:'minimal', gewicht:'168g',sprengung:'8mm', weite:'Schmal', tags:['Profi','Carbon','Sub-2:30'],        desc:'TitanCore-Platte Gen-3 mit asymmetrischer Fersenverstärkung – entwickelt für sub-2:30h.',sizes:[40,41,42,43,44,45]},
+  {id:32,name:'Peak Dominator Elite',emoji:'🏃',color:'#101A08',price:255,rating:4.9,reviews:143, gelände:'trail',    level:'profi',          pronation:'neutral',      dämpfung:'mittel',  gewicht:'231g',sprengung:'4mm', weite:'Normal', tags:['Profi','Trail','Race'],             desc:'CarbonFlex-Biegesteife mit VariaGrip-Außensohle für Profi-Trailläufer und Bergmarathons.',sizes:[40,41,42,43,44,45,46]},
+  {id:33,name:'EliteStride X1',      emoji:'👟',color:'#1A0828',price:229,rating:4.8,reviews:211, gelände:'straße',   level:'profi',          pronation:'neutral',      dämpfung:'mittel',  gewicht:'198g',sprengung:'7mm', weite:'Normal', tags:['Profi','Speed','Wettkampf'],        desc:'Profi-Trainingsschuh. HyperReact-Schaumkombination mit Karbonfaser-Verstrebung.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:34,name:'OuterEdge Run',       emoji:'🏃',color:'#28200A',price:152,rating:4.3,reviews:178, gelände:'straße',   level:'alle',           pronation:'supination',   dämpfung:'maximal', gewicht:'271g',sprengung:'10mm',weite:'Schmal', tags:['Straße','Unterpronation','Lateral'],desc:'Verstärkte Außenkante und Polsterung für Läufer mit Supination (Unterpronation).',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:35,name:'LateralGrip Trail',   emoji:'👟',color:'#1E2808',price:162,rating:4.4,reviews:134, gelände:'trail',    level:'alle',           pronation:'supination',   dämpfung:'maximal', gewicht:'284g',sprengung:'5mm', weite:'Schmal', tags:['Trail','Unterpronation','Lateral'],  desc:'ExoShell-Außenwandverstärkung verhindert Umknicken auf unebenem Untergrund für Supinierer.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:36,name:'MountainStep 4',      emoji:'🏃',color:'#162210',price:132,rating:4.3,reviews:312, gelände:'trail',    level:'anfänger',       pronation:'neutral',      dämpfung:'maximal', gewicht:'305g',sprengung:'6mm', weite:'Weit',   tags:['Trail','Anfänger','Maximal'],        desc:'Weicher Einstiegs-Trailschuh mit MaxCush-Dämpfung. Breit geschnitten für komfortablen Sitz auf unebenen Wegen.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:37,name:'TrailBreaker 2',      emoji:'👟',color:'#1C1808',price:141,rating:4.4,reviews:278, gelände:'trail',    level:'anfänger',       pronation:'neutral',      dämpfung:'mittel',  gewicht:'292g',sprengung:'5mm', weite:'Normal', tags:['Trail','Anfänger','Grip'],           desc:'Robuster Allwetter-Trailschuh für Einsteiger. DuraGrip-Sohle hält auf Schotter und nassem Wurzelwerk sicher.',sizes:[38,39,40,41,42,43,44,45]},
+  {id:38,name:'RidgeLine Pro',       emoji:'🏃',color:'#0E1C0A',price:164,rating:4.6,reviews:489, gelände:'trail',    level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'261g',sprengung:'6mm', weite:'Normal', tags:['Trail','Fortgeschritten','Mittel'],  desc:'Schneller und reaktiver Trailschuh für regelmäßige Läufer. Torsionssteife Sohle und leichtes Mesh für Tempo im Gelände.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:39,name:'StoneShield X',       emoji:'👟',color:'#241E0A',price:172,rating:4.5,reviews:367, gelände:'trail',    level:'fortgeschritten',pronation:'neutral',      dämpfung:'maximal', gewicht:'316g',sprengung:'4mm', weite:'Normal', tags:['Trail','Schutz','Maximal'],          desc:'Maximale Dämpfung plus verstärkte Steinschutzplatte für technisch anspruchsvolle Trails.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:40,name:'VerticalFlow',        emoji:'🏃',color:'#12220C',price:148,rating:4.4,reviews:223, gelände:'trail',    level:'alle',           pronation:'neutral',      dämpfung:'minimal', gewicht:'234g',sprengung:'3mm', weite:'Schmal', tags:['Trail','Leicht','Minimal'],          desc:'Ultraleichter Trailschuh mit MicroGrip-Stollen für Läufer, die Bodengefühl auf dem Trail bevorzugen.',sizes:[39,40,41,42,43,44,45]},
+  {id:41,name:'Summit Ultra 2',      emoji:'👟',color:'#1A1006',price:188,rating:4.7,reviews:541, gelände:'trail',    level:'alle',           pronation:'overpronation',dämpfung:'maximal', gewicht:'328g',sprengung:'8mm', weite:'Weit',   tags:['Trail','Überpronation','Ultra'],     desc:'Stabilitäts-Trailschuh für Überpronation. DualGuard-Rahmen und CushFoam für 100-km-Rennen.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:42,name:'ProPeak Elite',       emoji:'🏃',color:'#0A1A04',price:248,rating:4.9,reviews:167, gelände:'trail',    level:'profi',          pronation:'neutral',      dämpfung:'mittel',  gewicht:'219g',sprengung:'4mm', weite:'Normal', tags:['Profi','Trail','Berge'],             desc:'Profi-Bergmarathonschuh mit CarbonSprint-Platte und AggressivStud-Außensohle. Für UTMB-Niveau.',sizes:[40,41,42,43,44,45]},
+  {id:43,name:'UrbanPace 3',         emoji:'👟',color:'#202030',price:122,rating:4.3,reviews:634, gelände:'straße',   level:'anfänger',       pronation:'neutral',      dämpfung:'mittel',  gewicht:'279g',sprengung:'10mm',weite:'Normal', tags:['Straße','Anfänger','Alltag'],        desc:'Stilvoller Alltagsläufer für den Stadtmenschen. FlexGrid-Sohle federt Asphalt komfortabel ab.',sizes:[37,38,39,40,41,42,43,44,45,46]},
+  {id:44,name:'NightRunner',         emoji:'🏃',color:'#08082A',price:138,rating:4.4,reviews:398, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'mittel',  gewicht:'268g',sprengung:'9mm', weite:'Normal', tags:['Straße','Sichtbarkeit','Nacht'],     desc:'Mit 360°-Reflektoren und LED-Streifen am Fersenbereich. SafeRun-Technologie für sichere Abendrunden.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:45,name:'RecoveryRun+',        emoji:'👟',color:'#280E28',price:148,rating:4.5,reviews:512, gelände:'straße',   level:'alle',           pronation:'neutral',      dämpfung:'maximal', gewicht:'331g',sprengung:'13mm',weite:'Weit',   tags:['Straße','Regeneration','Maximal'],   desc:'Der Regenerationsschuh für den Tag nach dem langen Lauf. UltraPlush-Foam für lockere Erholungseinheiten.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:46,name:'CarbonTrainer V2',    emoji:'🏃',color:'#18082E',price:212,rating:4.7,reviews:289, gelände:'straße',   level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'210g',sprengung:'8mm', weite:'Normal', tags:['Straße','Carbon','Training'],        desc:'Täglicher Trainingsschuh mit voller Carbonplatte für Rennschuh-Feeling im Training. SpringStep V2.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:47,name:'StableStride 3',      emoji:'👟',color:'#1E1020',price:159,rating:4.5,reviews:445, gelände:'straße',   level:'alle',           pronation:'overpronation',dämpfung:'mittel',  gewicht:'308g',sprengung:'10mm',weite:'Normal', tags:['Straße','Überpronation','Stabil'],   desc:'Kompakter Stabilitätsschuh mit MedPost-Stützsystem gegen Überpronation ohne Laufgefühlverlust.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:48,name:'WideFoot Pro',        emoji:'🏃',color:'#102828',price:134,rating:4.4,reviews:356, gelände:'straße',   level:'anfänger',       pronation:'overpronation',dämpfung:'maximal', gewicht:'322g',sprengung:'12mm',weite:'Weit',   tags:['Straße','Überpronation','Weit'],     desc:'Extra weit für Läufer mit breiten Füßen und Überpronation. XtraWidth-Leisten mit orthopädischer Einlegesohle.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:49,name:'SupinaRun 2',         emoji:'👟',color:'#2A1808',price:145,rating:4.3,reviews:189, gelände:'straße',   level:'alle',           pronation:'supination',   dämpfung:'mittel',  gewicht:'264g',sprengung:'9mm', weite:'Schmal', tags:['Straße','Unterpronation','Mittel'],  desc:'LateralCush-Technologie auf der Außenkante verhindert Knöchelbelastung bei Supination.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:50,name:'RaceFlash 10K',       emoji:'🏃',color:'#0A0A20',price:178,rating:4.6,reviews:334, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'201g',sprengung:'7mm', weite:'Normal', tags:['Wettkampf','10K','Speed'],           desc:'Perfekt ausbalancierter Wettkampfschuh für 5K bis 10K. SpeedLayer-Mesh und reaktiver NitroFoam.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:51,name:'HalfMarathon X',      emoji:'👟',color:'#150518',price:195,rating:4.7,reviews:412, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'minimal', gewicht:'214g',sprengung:'8mm', weite:'Normal', tags:['Wettkampf','Halbmarathon','Carbon'], desc:'Leichtcarbon-Platte und DualFoam halten bis zum letzten Kilometer Energie zurück. Für 21,1 km entwickelt.',sizes:[39,40,41,42,43,44,45,46]},
+  {id:52,name:'EliteTrack 400',      emoji:'🏃',color:'#0C0418',price:229,rating:4.8,reviews:201, gelände:'wettkampf',level:'profi',          pronation:'neutral',      dämpfung:'minimal', gewicht:'158g',sprengung:'6mm', weite:'Schmal', tags:['Profi','Wettkampf','Track'],         desc:'Profi-Bahnschuh für 400m bis 5000m. PolyFoam-Kern mit Spike-Board-Außensohle für maximale Kraftübertragung.',sizes:[39,40,41,42,43,44,45]},
+  {id:53,name:'MarathonPro Open',    emoji:'👟',color:'#0E0820',price:258,rating:4.9,reviews:143, gelände:'wettkampf',level:'profi',          pronation:'neutral',      dämpfung:'mittel',  gewicht:'178g',sprengung:'7mm', weite:'Normal', tags:['Profi','Marathon','Carbon'],         desc:'Profi-Marathon-Schuh mit asymmetrischer Carbonplatte für höhere Kurveneffizienz. DynamicFit-Obermaterial.',sizes:[40,41,42,43,44,45]},
+  {id:54,name:'SpeedTrial GTR',      emoji:'🏃',color:'#14041C',price:199,rating:4.6,reviews:267, gelände:'wettkampf',level:'alle',           pronation:'neutral',      dämpfung:'minimal', gewicht:'222g',sprengung:'7mm', weite:'Normal', tags:['Wettkampf','Allrounder','Speed'],    desc:'Einsteiger-Wettkampfschuh ohne Carbonplatte – für erste Rennen. Reaktiver HyperBounce-Schaum.',sizes:[38,39,40,41,42,43,44,45,46]},
+  {id:55,name:'DualRace Comp',       emoji:'👟',color:'#100C22',price:235,rating:4.8,reviews:188, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'195g',sprengung:'9mm', weite:'Normal', tags:['Wettkampf','Marathon','Vielseitig'], desc:'Zwei Schaum-Lagen mit unterschiedlicher Dichte für Komfort und Reaktion auf Halbmarathon und Marathon.',sizes:[40,41,42,43,44,45,46]}
+];
+
+const FLOW=[
+  {id:'gelände',q:'Hallo! 👋 Ich bin dein persönlicher Laufschuh-Berater aus dem StrideShop.\n\nIch finde in wenigen Schritten deinen perfekten Schuh aus unseren <strong>55 Modellen</strong>. Los geht\'s!\n\nFür welches Gelände suchst du einen Laufschuh?',opts:['🏙️ Straße / Asphalt','🌲 Trail / Natur','🏆 Wettkampf / Rennen','🔄 Mehrere / Flexibel'],key:'gelände'},
+  {id:'level',q:'Wie viel Lauferfahrung hast du?',opts:['🌱 Anfänger (< 1 Jahr)','🚶 Gelegentlich (1–3 Jahre)','🏃 Regelmäßig (3+ Jahre)','🥇 Fortgeschritten / Wettkämpfer','🏅 Profi / Eliteläufer'],key:'level'},
+  {id:'pronation',q:'Weißt du, wie dein Fuß beim Laufen aufrollt? (Pronation)',opts:['✅ Neutral – normales Abrollen','↙️ Überpronation – Fuß kippt nach innen','↗️ Unterpronation – Fuß kippt nach außen','❓ Weiß ich nicht'],key:'pronation'},
+  {id:'budget',q:'Was ist dein ungefähres Budget?',opts:['💸 Bis 120 €','💰 120–160 €','💳 160–200 €','👑 Über 200 €'],key:'budget'},
+  {id:'dämpfung',q:'Welche Dämpfung bevorzugst du beim Laufen?',opts:['🪨 Minimal – direktes Bodengefühl','⚖️ Mittel – ausgewogen','☁️ Maximal – weich & komfortabel','🤷 Keine Präferenz'],key:'dämpfung'}
+];
+
+let state={step:0,answers:{},selSize:null};
+let cartCount=0;
+
+// ── TRACKING ──────────────────────────────────────────────
+const SHEETS_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
+const tracking={
+  startTime: Date.now(),
+  interaktionen: 0,
+  gesendet: false
+};
+
+function getGeraet(){
+  return /Mobi|Android/i.test(navigator.userAgent)?'Mobile':'Desktop';
+}
+
+function trackInteraktion(typ){
+  tracking.interaktionen++;
+  gtag('event','chatbot_interaktion',{event_category:'Chatbot',event_label:typ});
+}
+
+function sendTracking(schuh){
+  if(tracking.gesendet) return;
+  tracking.gesendet=true;
+  const sek=Math.round((Date.now()-tracking.startTime)/1000);
+  const payload={
+    website: 'Chatbot-Website',
+    completion_time_sek: sek,
+    anzahl_klicks: tracking.interaktionen,
+    filter_klicks: state.step,
+    detail_oeffnungen: '–',
+    erfolg: schuh?'Ja':'Nein',
+    gewaehlter_schuh: schuh||'–',
+    geraet: getGeraet()
+  };
+  gtag('event','kauf_abschluss',{
+    event_category:'Conversion',
+    event_label:schuh||'abgebrochen',
+    value: sek
+  });
+  fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+window.addEventListener('beforeunload',()=>{
+  if(!tracking.gesendet) sendTracking(null);
+});
+// ─────────────────────────────────────────────────────────
+
+function now(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}
+
+function addBot(html,qrOpts=[],extraEl=null){
+  const c=document.getElementById('chat');
+  const m=document.createElement('div');
+  m.className='msg bot';
+  m.innerHTML=`<div class="avatar bot">🤖</div><div class="bubble"><div class="bubble-content">${html}</div><div class="bubble-time">StrideShop KI · ${now()}</div></div>`;
+  c.appendChild(m);
+  if(extraEl){c.appendChild(extraEl)}
+  if(qrOpts.length){
+    const qr=document.createElement('div');
+    qr.className='qr-row';qr.id='qr';
+    qr.innerHTML=qrOpts.map(o=>`<button class="qr-btn" onclick="handleQR(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+    c.appendChild(qr);
+  }
+  c.scrollTop=c.scrollHeight;
+}
+
+function addUser(text){
+  const c=document.getElementById('chat');
+  const m=document.createElement('div');
+  m.className='msg user';
+  m.innerHTML=`<div class="avatar user">🧑</div><div class="bubble"><div class="bubble-content">${text}</div><div class="bubble-time">${now()}</div></div>`;
+  c.appendChild(m);
+  c.scrollTop=c.scrollHeight;
+}
+
+function showTyping(){
+  const c=document.getElementById('chat');
+  const m=document.createElement('div');
+  m.className='msg bot';m.id='typing';
+  m.innerHTML=`<div class="avatar bot">🤖</div><div class="bubble"><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  c.appendChild(m);c.scrollTop=c.scrollHeight;
+}
+
+function removeTyping(){const t=document.getElementById('typing');if(t)t.remove()}
+function removeQR(){const q=document.getElementById('qr');if(q)q.remove()}
+
+function updateProgress(){
+  const total=5,done=state.step;
+  for(let i=1;i<=5;i++){
+    const el=document.getElementById('ps'+i);
+    if(!el)continue;
+    el.className='progress-step '+(i<=done?'done':i===done+1?'active':'');
+  }
+  document.getElementById('progress-label').textContent=done>=5?'Auswertung fertig ✓':`Schritt ${Math.min(done+1,5)} von 5`;
+}
+
+function handleQR(btn,val){
+  removeQR();
+  addUser(val);
+  processAnswer(val);
+}
+
+function sendMsg(){
+  const b=document.getElementById('input-box');
+  const t=b.value.trim();
+  if(!t)return;
+  b.value='';b.style.height='';
+  removeQR();
+  addUser(t);
+  processAnswer(t);
+}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
+
+function processAnswer(answer){
+  trackInteraktion('antwort');
+  const flow=FLOW[state.step];
+  if(flow) state.answers[flow.key]=answer.toLowerCase();
+  const delay=700+Math.random()*500;
+  showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    state.step++;
+    updateProgress();
+    if(state.step<FLOW.length){
+      addBot(FLOW[state.step].q,FLOW[state.step].opts);
+    } else {
+      showResults();
+    }
+  },delay);
+}
+
+function scoreProduct(p,a){
+  let s=0;
+  const g=a.gelände||'';
+  if(g.includes('straße')&&p.gelände==='straße') s+=4;
+  if(g.includes('trail')&&p.gelände==='trail') s+=4;
+  if(g.includes('wettkampf')&&p.gelände==='wettkampf') s+=4;
+  if(g.includes('flexibel')&&(p.gelände==='straße'||p.gelände==='trail')) s+=2;
+  const l=a.level||'';
+  if(l.includes('anfänger')&&p.level==='anfänger') s+=2;
+  if((l.includes('regelmäßig')||l.includes('gelegentlich'))&&p.level==='alle') s+=1;
+  if((l.includes('fortgeschritten')||l.includes('wettkämpfer'))&&p.level==='fortgeschritten') s+=2;
+  if(l.includes('profi')&&p.level==='profi') s+=3;
+  if(p.level==='alle') s+=1;
+  const pr=a.pronation||'';
+  if(pr.includes('überpronation')&&p.pronation==='overpronation') s+=3;
+  if(pr.includes('unterpronation')&&p.pronation==='supination') s+=3;
+  if(pr.includes('neutral')&&p.pronation==='neutral') s+=2;
+  if(pr.includes('nicht')&&p.pronation==='neutral') s+=1;
+  const b=a.budget||'';
+  if(b.includes('bis 120')&&p.price<=125) s+=2;
+  if(b.includes('120')&&p.price>=120&&p.price<=165) s+=2;
+  if(b.includes('160')&&p.price>=155&&p.price<=205) s+=2;
+  if(b.includes('200')&&p.price>=195) s+=2;
+  const d=a.dämpfung||'';
+  if(d.includes('minimal')&&p.dämpfung==='minimal') s+=3;
+  if(d.includes('mittel')&&p.dämpfung==='mittel') s+=3;
+  if(d.includes('maximal')&&p.dämpfung==='maximal') s+=3;
+  return s;
+}
+
+function showResults(){
+  const scored=PRODUCTS.map(p=>({...p,score:scoreProduct(p,state.answers)})).sort((a,b)=>b.score-a.score);
+  const top4=scored.slice(0,4);
+  state.top4=top4;
+
+  addBot(`Perfekt – ich habe alle deine Angaben ausgewertet! 🎯<br><br>Aus unseren <strong>55 Modellen</strong> habe ich die <strong>4 besten Treffer</strong> für dich gefunden. Meine Topempfehlung: <strong>${top4[0].name}</strong>.`);
+
+  setTimeout(()=>{
+    const c=document.getElementById('chat');
+    const grid=document.createElement('div');
+    grid.className='chat-grid';
+    grid.innerHTML=top4.map((p,i)=>{
+      const pronLabel=p.pronation==='neutral'?'Neutral':p.pronation==='overpronation'?'Überpronation':'Unterpronation';
+      const gelLabel=p.gelände.charAt(0).toUpperCase()+p.gelände.slice(1);
+      const levelLabel=p.level==='alle'?'Alle Level':p.level.charAt(0).toUpperCase()+p.level.slice(1);
+      return `
+      <div class="chat-card${i===0?' featured':''}" onclick="showDetail(${p.id})">
+        ${i===0?'<span class="cc-badge">⭐ Top-Empfehlung</span>':i===1?'<span class="cc-badge">👍 Sehr geeignet</span>':''}
+        <span class="cc-emoji" style="display:block;font-size:2.3rem;margin-bottom:.4rem;background:${p.color};border-radius:8px;padding:.4rem;text-align:center">${p.emoji}</span>
+        <div class="cc-name">${p.name}</div>
+        <div class="cc-price">${p.price} €</div>
+        <div class="cc-match">${['Perfekter Match','Sehr geeignet','Gute Option','Alternative'][i]}</div>
+        <div class="cc-props">
+          <span class="cc-prop cc-prop-gelände">${gelLabel}</span>
+          <span class="cc-prop cc-prop-level">${levelLabel}</span>
+          <span class="cc-prop cc-prop-pron">${pronLabel}</span>
+        </div>
+      </div>`;
+    }).join('');
+    c.appendChild(grid);
+    c.scrollTop=c.scrollHeight;
+
+    setTimeout(()=>{
+      addBot('Klick auf einen Schuh für alle Details, oder frag mich einfach etwas!',[
+        '🔄 Neue Beratung starten',
+        '⚖️ Schuhe vergleichen'
+      ]);
+    },400);
+  },200);
+}
+
+function showDetail(id){
+  trackInteraktion('detail');
+  const p=PRODUCTS.find(x=>x.id===id);
+  state.selSize=null;
+  removeQR();
+  addUser(`Zeig mir Details zum ${p.name}`);
+  showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    addBot(`Hier alle Infos zum <strong>${p.name}</strong>:`);
+    const c=document.getElementById('chat');
+    const d=document.createElement('div');
+    d.className='chat-detail';
+    d.innerHTML=`
+      <div class="cd-header">
+        <div class="cd-emoji" style="background:${p.color}">${p.emoji}</div>
+        <div>
+          <div class="cd-name">${p.name}</div>
+          <div class="cd-price">${p.price} €</div>
+          <div class="cd-desc">${p.desc}</div>
+        </div>
+      </div>
+      <div class="cd-specs">
+        <div class="cd-spec"><div class="cd-spec-label">Gewicht</div><div class="cd-spec-val">${p.gewicht}</div></div>
+        <div class="cd-spec"><div class="cd-spec-label">Sprengung</div><div class="cd-spec-val">${p.sprengung}</div></div>
+        <div class="cd-spec"><div class="cd-spec-label">Dämpfung</div><div class="cd-spec-val">${p.dämpfung}</div></div>
+        <div class="cd-spec"><div class="cd-spec-label">Weite</div><div class="cd-spec-val">${p.weite}</div></div>
+      </div>
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.5rem">Größe wählen</div>
+      <div class="cd-sizes">${p.sizes.map(s=>`<button class="cd-size" onclick="selSize(this,${s})">${s}</button>`).join('')}</div>
+      <button class="cd-add" onclick="addCart('${p.name}')">In den Warenkorb legen</button>`;
+    c.appendChild(d);
+    setTimeout(()=>{
+      addBot('Hast du noch Fragen?',[
+        '🔄 Neue Beratung starten'
+      ]);
+    },350);
+    c.scrollTop=c.scrollHeight;
+  },900);
+}
+
+function selSize(el,s){
+  document.querySelectorAll('.cd-size').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');state.selSize=s;
+}
+
+function addCart(name){
+  if(!state.selSize){
+    removeQR();
+    addBot('Bitte wähle zuerst eine Größe – klick auf eine der Größen oben! 👆');
+    return;
+  }
+  trackInteraktion('kauf');
+  sendTracking(name);
+  cartCount++;
+  document.getElementById('cart-btn').textContent=`🛒 Warenkorb (${cartCount})`;
+  removeQR();
+  addBot(`✅ <strong>${name}</strong> in Größe <strong>${state.selSize}</strong> wurde hinzugefügt!<br>Möchtest du noch etwas stöbern?`,[
+    '🛍️ Mehr Schuhe ansehen',
+    '💳 Zur Kasse',
+    '🔄 Neue Beratung'
+  ]);
+  showToast('✓',`${name} (Gr.${state.selSize}) hinzugefügt`);
+}
+
+function showToast(icon,msg){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<span class="t-ok">${icon}</span>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+function handleFollowup(text){
+  removeQR();
+  if(!text)return;
+  addUser(text);
+  showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    const tl=text.toLowerCase();
+    if(tl.includes('neue beratung')||tl.includes('neu')){
+      state={step:0,answers:{},selSize:null};
+      updateProgress();
+      addBot(FLOW[0].q,FLOW[0].opts);
+    } else if(tl.includes('pronation')){
+      addBot('Die <strong>Pronation</strong> beschreibt das Abrollen deines Fußes:<br><br><strong>Neutral</strong> – gleichmäßiges Abrollen (70% aller Läufer)<br><strong>Überpronation</strong> – Fuß kippt nach innen (flache Füße, Knieschmerzen möglich)<br><strong>Supination</strong> – Fuß kippt nach außen (eher selten)<br><br>Tipp: Lass dich in einem Laufladen analysieren!',['Schuhe für Überpronation','Neutrale Schuhe zeigen']);
+    } else if(tl.includes('größe')){
+      addBot('Faustregel für Laufschuhe:<br><br>📐 Fußlänge messen (abends, Füße sind dann am größten)<br>➕ 1,0–1,5 cm Spielraum dazurechnen<br>📏 Beispiel: 26cm Fuß → Größe 41–42<br><br>Beachte: Laufschuhe sitzen etwas weiter als Alltagsschuhe. Welchen Schuh möchtest du ausprobieren?',['Zum Apex Flow 3','Zum CloudStep 9']);
+    } else if(tl.includes('vergleich')){
+      const t=state.top4||[];
+      if(!t.length){
+        addBot('Starte zuerst eine Beratung, damit ich dir deine persönlichen Top-Schuhe vergleichen kann!',['🔄 Neue Beratung starten']);
+      } else {
+        const medals=['🥇','🥈','🥉','🏅'];
+        const pronLabel=p=>p.pronation==='neutral'?'Neutral':p.pronation==='overpronation'?'Überpronation':'Unterpronation';
+        const levelLabel=p=>p.level==='alle'?'Alle Level':p.level.charAt(0).toUpperCase()+p.level.slice(1);
+        const rows=t.map((p,i)=>`${medals[i]} <strong>${p.name}</strong> – ${p.price}€ · ${p.rating}★ · ${p.gelände.charAt(0).toUpperCase()+p.gelände.slice(1)} · ${levelLabel(p)} · ${pronLabel(p)} · Dämpfung: ${p.dämpfung} · ${p.gewicht}`).join('<br><br>');
+        addBot(`Hier dein persönlicher Vergleich der 4 besten Treffer:<br><br>${rows}`);
+      }
+    } else if(tl.includes('kasse')){
+      addBot(`Dein Warenkorb enthält <strong>${cartCount} Artikel</strong>. In dieser Demo endet die Simulation hier – im echten Shop würde es jetzt zur Kasse gehen! 🛒`);
+    } else {
+      // try to find product by name in text
+      const found=PRODUCTS.find(p=>tl.includes(p.name.toLowerCase())||tl.includes(p.brand.toLowerCase()));
+      if(found){showDetail(found.id);}
+      else{addBot('Ich helfe dir gerne! Du kannst auf einen Schuh klicken, nach Kategorien fragen oder einfach schreiben, was du suchst.',['Alle Empfehlungen','🔄 Neue Beratung']);}
+    }
+  },900);
+}
+
+// override addBot to intercept quick-reply clicks for follow-up handling
+const _origQR=window.handleQR;
+window.handleQR=function(btn,val){
+  const step=state.step;
+  removeQR();
+  addUser(val);
+  if(step>=FLOW.length){
+    handleFollowup(val);
+  } else {
+    processAnswer(val);
+  }
+};
+
+function restartChat(){
+  state={step:0,answers:{},selSize:null};
+  cartCount=0;
+  document.getElementById('cart-btn').textContent='🛒 Warenkorb (0)';
+  const c=document.getElementById('chat');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  updateProgress();
+  setTimeout(start,300);
+}
+
+function start(){
+  updateProgress();
+  setTimeout(()=>{addBot(FLOW[0].q,FLOW[0].opts)},400);
+}
+
+start();
+</script>
+</body>
+</html>
