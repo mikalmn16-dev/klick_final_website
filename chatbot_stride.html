@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StrideShop – KI-Berater</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2QXWR80E3Q"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2QXWR80E3Q');
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -236,6 +244,50 @@ const FLOW=[
 let state={step:0,answers:{},selSize:null};
 let cartCount=0;
 
+// ── TRACKING ──────────────────────────────────────────────
+const SHEETS_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
+const tracking={
+  startTime: Date.now(),
+  interaktionen: 0,
+  gesendet: false
+};
+
+function getGeraet(){
+  return /Mobi|Android/i.test(navigator.userAgent)?'Mobile':'Desktop';
+}
+
+function trackInteraktion(typ){
+  tracking.interaktionen++;
+  gtag('event','chatbot_interaktion',{event_category:'Chatbot',event_label:typ});
+}
+
+function sendTracking(schuh){
+  if(tracking.gesendet) return;
+  tracking.gesendet=true;
+  const sek=Math.round((Date.now()-tracking.startTime)/1000);
+  const payload={
+    website: 'Chatbot-Website',
+    completion_time_sek: sek,
+    anzahl_klicks: tracking.interaktionen,
+    filter_klicks: state.step,
+    detail_oeffnungen: '–',
+    erfolg: schuh?'Ja':'Nein',
+    gewaehlter_schuh: schuh||'–',
+    geraet: getGeraet()
+  };
+  gtag('event','kauf_abschluss',{
+    event_category:'Conversion',
+    event_label:schuh||'abgebrochen',
+    value: sek
+  });
+  fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+window.addEventListener('beforeunload',()=>{
+  if(!tracking.gesendet) sendTracking(null);
+});
+// ─────────────────────────────────────────────────────────
+
 function now(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}
 
 function addBot(html,qrOpts=[],extraEl=null){
@@ -304,6 +356,7 @@ function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMs
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
 
 function processAnswer(answer){
+  trackInteraktion('antwort');
   const flow=FLOW[state.step];
   if(flow) state.answers[flow.key]=answer.toLowerCase();
   const delay=700+Math.random()*500;
@@ -392,6 +445,7 @@ function showResults(){
 }
 
 function showDetail(id){
+  trackInteraktion('detail');
   const p=PRODUCTS.find(x=>x.id===id);
   state.selSize=null;
   removeQR();
@@ -442,6 +496,8 @@ function addCart(name){
     addBot('Bitte wähle zuerst eine Größe – klick auf eine der Größen oben! 👆');
     return;
   }
+  trackInteraktion('kauf');
+  sendTracking(name);
   cartCount++;
   document.getElementById('cart-btn').textContent=`🛒 Warenkorb (${cartCount})`;
   removeQR();
