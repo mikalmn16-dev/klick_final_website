@@ -341,45 +341,23 @@ async function askClaude(userMessage){
   try{
     const res=await fetch(PROXY_URL,{
       method:'POST',
-      mode:'no-cors',
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({
-        claudeRequest: true,
+        claudeRequest:true,
         model:'claude-sonnet-4-20250514',
         max_tokens:400,
         system:SYSTEM_PROMPT,
         messages:state.messages
       })
     });
-    // no-cors gibt opaque response zurück – direkt Anthropic API aufrufen
-    throw new Error('fallback');
+    const data=await res.json();
+    const antwort=data.content?.[0]?.text||'Entschuldigung, ich hatte einen Fehler.';
+    state.messages.push({role:'assistant',content:antwort});
+    return antwort;
   }catch(e){
-    // Direkt Anthropic API mit API Key
-    try{
-      const res2=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key':'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',
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:400,
-          system:SYSTEM_PROMPT,
-          messages:state.messages
-        })
-      });
-      const data=await res2.json();
-      const antwort=data.content?.[0]?.text||'Kein Ergebnis.';
-      state.messages.push({role:'assistant',content:antwort});
-      return antwort;
-    }catch(e2){
-      const fallback='Entschuldigung, die KI ist gerade nicht erreichbar.';
-      state.messages.push({role:'assistant',content:fallback});
-      return fallback;
-    }
+    const fallback='Entschuldigung, die KI ist gerade nicht erreichbar. Bitte versuche es nochmal.';
+    state.messages.push({role:'assistant',content:fallback});
+    return fallback;
   }
 }
 
