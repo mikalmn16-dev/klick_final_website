@@ -334,26 +334,22 @@ function updateProgress(){
   document.getElementById('progress-label').textContent=label;
 }
 
-const PROXY_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
+const PROXY_URL='https://klickfinalwebsite1.mikalmn16.workers.dev';
 
 async function askClaude(userMessage){
   state.messages.push({role:'user',content:userMessage});
   try{
-    // Apps Script über doGet aufrufen mit encoded payload
-    const payload=encodeURIComponent(JSON.stringify({
-      claudeRequest:true,
-      model:'claude-sonnet-4-20250514',
-      max_tokens:400,
-      system:SYSTEM_PROMPT,
-      messages:state.messages
-    }));
-    const res=await fetch(PROXY_URL+'?data='+payload,{
-      method:'GET',
-      mode:'cors'
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:SYSTEM_PROMPT,
+        messages:state.messages
+      })
     });
-    const text=await res.text();
-    console.log('Antwort:', text);
-    const data=JSON.parse(text);
+    const data=await res.json();
     const antwort=data.content?.[0]?.text||'Kein Text.';
     state.messages.push({role:'assistant',content:antwort});
     return antwort;
