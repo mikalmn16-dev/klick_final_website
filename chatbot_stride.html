@@ -36,7 +36,10 @@
   --radius-lg:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100dvh;height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-text-size-adjust:100%}
+html{height:100%;height:-webkit-fill-available}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);
+  height:100vh;height:100dvh;height:-webkit-fill-available;
+  display:flex;flex-direction:column;overflow:hidden;-webkit-text-size-adjust:100%}
 
 /* NAV */
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1rem;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -59,7 +62,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1r
 .progress-label{font-size:.65rem;color:var(--muted);margin-left:.65rem;white-space:nowrap}
 
 /* CHAT */
-.chat-area{flex:1;overflow-y:auto;overflow-x:hidden;padding:1rem .75rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.chat-area{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:1rem .75rem;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .chat-area::-webkit-scrollbar{width:3px}
 .chat-area::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
 
@@ -122,7 +125,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1r
 .cd-add{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:.78rem;font-size:.92rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent}
 
 /* INPUT */
-.input-area{border-top:1px solid var(--border);background:var(--surface);padding:.75rem 1rem;padding-bottom:max(.75rem,env(safe-area-inset-bottom));flex-shrink:0}
+.input-area{flex-shrink:0;border-top:1px solid var(--border);background:var(--surface);padding:.75rem 1rem;padding-bottom:max(.75rem,env(safe-area-inset-bottom))}
 .input-wrap{max-width:760px;margin:0 auto;display:flex;gap:.55rem;align-items:flex-end}
 .input-box{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.65rem .9rem;font-size:16px;color:var(--text);font-family:'Outfit',sans-serif;outline:none;resize:none;min-height:42px;max-height:100px;transition:border-color .2s;-webkit-appearance:none}
 .input-box::placeholder{color:var(--muted2)}
@@ -160,7 +163,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1r
     <div class="progress-step" id="ps3"></div>
     <div class="progress-step" id="ps4"></div>
     <div class="progress-step" id="ps5"></div>
-    <span class="progress-label" id="progress-label">Schritt 1 von 5</span>
+    <span class="progress-label" id="progress-label">Beratung startet …</span>
   </div>
 </div>
 
@@ -168,10 +171,10 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1r
 
 <div class="input-area">
   <div class="input-wrap">
-    <textarea class="input-box" id="input-box" placeholder="Schreib deine Antwort oder wähle eine Option oben …" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <textarea class="input-box" id="input-box" placeholder="Frag mich etwas zum Schuh, zur Größe, Pflege …" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" onclick="sendMsg()">➤</button>
   </div>
-  <div class="input-hint">KI-gestützter Produktberater · Alle 30 Modelle · StrideShop 2025</div>
+  <div class="input-hint">KI-gestützter Produktberater · Alle 55 Modelle · StrideShop 2025</div>
 </div>
 
 <script>
@@ -233,28 +236,35 @@ const PRODUCTS=[
   {id:55,name:'DualRace Comp',       emoji:'👟',color:'#100C22',price:235,rating:4.8,reviews:188, gelände:'wettkampf',level:'fortgeschritten',pronation:'neutral',      dämpfung:'mittel',  gewicht:'195g',sprengung:'9mm', weite:'Normal', tags:['Wettkampf','Marathon','Vielseitig'], desc:'Zwei Schaum-Lagen mit unterschiedlicher Dichte für Komfort und Reaktion auf Halbmarathon und Marathon.',sizes:[40,41,42,43,44,45,46]}
 ];
 
-const FLOW=[
-  {id:'gelände',q:'Hallo! 👋 Ich bin dein persönlicher Laufschuh-Berater aus dem StrideShop.\n\nIch finde in wenigen Schritten deinen perfekten Schuh aus unseren <strong>55 Modellen</strong>. Los geht\'s!\n\nFür welches Gelände suchst du einen Laufschuh?',opts:['🏙️ Straße / Asphalt','🌲 Trail / Natur','🏆 Wettkampf / Rennen','🔄 Mehrere / Flexibel'],key:'gelände'},
-  {id:'level',q:'Wie viel Lauferfahrung hast du?',opts:['🌱 Anfänger (< 1 Jahr)','🚶 Gelegentlich (1–3 Jahre)','🏃 Regelmäßig (3+ Jahre)','🥇 Fortgeschritten / Wettkämpfer','🏅 Profi / Eliteläufer'],key:'level'},
-  {id:'pronation',q:'Weißt du, wie dein Fuß beim Laufen aufrollt? (Pronation)',opts:['✅ Neutral – normales Abrollen','↙️ Überpronation – Fuß kippt nach innen','↗️ Unterpronation – Fuß kippt nach außen','❓ Weiß ich nicht'],key:'pronation'},
-  {id:'budget',q:'Was ist dein ungefähres Budget?',opts:['💸 Bis 120 €','💰 120–160 €','💳 160–200 €','👑 Über 200 €'],key:'budget'},
-  {id:'dämpfung',q:'Welche Dämpfung bevorzugst du beim Laufen?',opts:['🪨 Minimal – direktes Bodengefühl','⚖️ Mittel – ausgewogen','☁️ Maximal – weich & komfortabel','🤷 Keine Präferenz'],key:'dämpfung'}
-];
+// Produktliste als kompakter String für den KI-Kontext
+const PRODUKT_KONTEXT=PRODUCTS.map(p=>
+  `ID:${p.id}|${p.name}|${p.gelände}|${p.level}|${p.pronation}|${p.dämpfung}|${p.weite}|${p.price}€|${p.gewicht}|${p.rating}★`
+).join('\n');
 
-let state={step:0,answers:{},selSize:null};
+const SYSTEM_PROMPT=`Du bist ein freundlicher, kompetenter Laufschuh-Berater für den StrideShop.
+Du führst ein natürliches Beratungsgespräch auf Deutsch und findest den perfekten Laufschuh für den Kunden.
+
+DEIN SORTIMENT (55 Modelle, Format: ID|Name|Gelände|Level|Pronation|Dämpfung|Weite|Preis|Gewicht|Bewertung):
+${PRODUKT_KONTEXT}
+
+GESPRÄCHSREGELN:
+- Stelle immer NUR EINE Frage auf einmal
+- Frag nach: Gelände, Erfahrung, Pronation, Budget, Dämpfungspräferenz
+- Wenn du genug weißt (nach 3-5 Fragen), empfiehl die 3 besten Schuhe aus dem Sortiment
+- Bei der Empfehlung: Nenne die exakten Schuh-IDs im Format [EMPFEHLUNG:id1,id2,id3]
+- Sei freundlich, kurz und präzise. Maximal 2-3 Sätze pro Nachricht.
+- Antworte NUR auf Deutsch.
+- Wenn der Nutzer einen Schuh details sehen will, antworte mit [DETAIL:id]
+- Wenn der Nutzer "kaufen" oder "warenkorb" erwähnt, antworte mit [KAUF:id]`;
+
+let state={messages:[],selSize:null,top4:[],beratungAbgeschlossen:false};
 let cartCount=0;
 
 // ── TRACKING ──────────────────────────────────────────────
 const SHEETS_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
-const tracking={
-  startTime: Date.now(),
-  interaktionen: 0,
-  gesendet: false
-};
+const tracking={startTime:Date.now(),interaktionen:0,gesendet:false};
 
-function getGeraet(){
-  return /Mobi|Android/i.test(navigator.userAgent)?'Mobile':'Desktop';
-}
+function getGeraet(){return /Mobi|Android/i.test(navigator.userAgent)?'Mobile':'Desktop';}
 
 function trackInteraktion(typ){
   tracking.interaktionen++;
@@ -262,48 +272,33 @@ function trackInteraktion(typ){
 }
 
 function sendTracking(schuh){
-  if(tracking.gesendet) return;
+  if(tracking.gesendet)return;
   tracking.gesendet=true;
   const sek=Math.round((Date.now()-tracking.startTime)/1000);
-  const payload={
-    website: 'Chatbot-Website',
-    completion_time_sek: sek,
-    anzahl_klicks: tracking.interaktionen,
-    filter_klicks: state.step,
-    detail_oeffnungen: '–',
-    erfolg: schuh?'Ja':'Nein',
-    gewaehlter_schuh: schuh||'–',
-    geraet: getGeraet()
-  };
-  gtag('event','kauf_abschluss',{
-    event_category:'Conversion',
-    event_label:schuh||'abgebrochen',
-    value: sek
-  });
-  fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload)}).catch(()=>{});
+  const payload={website:'Chatbot-Website',completion_time_sek:sek,anzahl_klicks:tracking.interaktionen,filter_klicks:state.messages.length,detail_oeffnungen:'–',erfolg:schuh?'Ja':'Nein',gewaehlter_schuh:schuh||'–',geraet:getGeraet()};
+  gtag('event','kauf_abschluss',{event_category:'Conversion',event_label:schuh||'abgebrochen',value:sek});
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  navigator.sendBeacon(SHEETS_URL,blob);
 }
 
-window.addEventListener('beforeunload',()=>{
-  if(!tracking.gesendet) sendTracking(null);
-});
+window.addEventListener('beforeunload',()=>{if(!tracking.gesendet)sendTracking(null);});
 // ─────────────────────────────────────────────────────────
 
-function now(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}
+function now(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
 
-function addBot(html,qrOpts=[],extraEl=null){
+function addBot(html,qrOpts=[]){
   const c=document.getElementById('chat');
   const m=document.createElement('div');
   m.className='msg bot';
   m.innerHTML=`<div class="avatar bot">🤖</div><div class="bubble"><div class="bubble-content">${html}</div><div class="bubble-time">StrideShop KI · ${now()}</div></div>`;
   c.appendChild(m);
-  if(extraEl){c.appendChild(extraEl)}
   if(qrOpts.length){
     const qr=document.createElement('div');
     qr.className='qr-row';qr.id='qr';
     qr.innerHTML=qrOpts.map(o=>`<button class="qr-btn" onclick="handleQR(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
     c.appendChild(qr);
   }
-  c.scrollTop=c.scrollHeight;
+  requestAnimationFrame(scrollToBottom);
 }
 
 function addUser(text){
@@ -312,7 +307,7 @@ function addUser(text){
   m.className='msg user';
   m.innerHTML=`<div class="avatar user">🧑</div><div class="bubble"><div class="bubble-content">${text}</div><div class="bubble-time">${now()}</div></div>`;
   c.appendChild(m);
-  c.scrollTop=c.scrollHeight;
+  requestAnimationFrame(scrollToBottom);
 }
 
 function showTyping(){
@@ -320,26 +315,108 @@ function showTyping(){
   const m=document.createElement('div');
   m.className='msg bot';m.id='typing';
   m.innerHTML=`<div class="avatar bot">🤖</div><div class="bubble"><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
-  c.appendChild(m);c.scrollTop=c.scrollHeight;
+  c.appendChild(m);requestAnimationFrame(scrollToBottom);
 }
 
-function removeTyping(){const t=document.getElementById('typing');if(t)t.remove()}
-function removeQR(){const q=document.getElementById('qr');if(q)q.remove()}
+function removeTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+function removeQR(){const q=document.getElementById('qr');if(q)q.remove();}
 
+// Fortschrittsbalken zeigt Gesprächsfortschritt
 function updateProgress(){
-  const total=5,done=state.step;
+  const msgs=state.messages.filter(m=>m.role==='user').length;
+  const steps=Math.min(msgs,5);
   for(let i=1;i<=5;i++){
     const el=document.getElementById('ps'+i);
     if(!el)continue;
-    el.className='progress-step '+(i<=done?'done':i===done+1?'active':'');
+    el.className='progress-step '+(i<steps?'done':i===steps?'active':'');
   }
-  document.getElementById('progress-label').textContent=done>=5?'Auswertung fertig ✓':`Schritt ${Math.min(done+1,5)} von 5`;
+  const label=state.beratungAbgeschlossen?'Beratung abgeschlossen ✓':`Frage ${Math.min(msgs+1,5)} von 5`;
+  document.getElementById('progress-label').textContent=label;
 }
 
-function handleQR(btn,val){
-  removeQR();
-  addUser(val);
-  processAnswer(val);
+const PROXY_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYMTrx3uK-Pm5hC-qPXLhZ5xeYHiqQTgKcSTiZXRrY3HmXQ/exec';
+
+async function askClaude(userMessage){
+  state.messages.push({role:'user',content:userMessage});
+  try{
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        claudeRequest: true,
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:SYSTEM_PROMPT,
+        messages:state.messages
+      })
+    });
+    const data=await res.json();
+    const antwort=data.content?.[0]?.text||'Entschuldigung, ich hatte einen Fehler. Bitte versuche es nochmal.';
+    state.messages.push({role:'assistant',content:antwort});
+    return antwort;
+  }catch(e){
+    const fallback='Entschuldigung, die KI ist gerade nicht erreichbar. Bitte versuche es nochmal.';
+    state.messages.push({role:'assistant',content:fallback});
+    return fallback;
+  }
+}
+
+function parseAndRender(antwort){
+  // Prüfe auf Empfehlung [EMPFEHLUNG:1,2,3]
+  const empMatch=antwort.match(/\[EMPFEHLUNG:([\d,]+)\]/);
+  if(empMatch){
+    state.beratungAbgeschlossen=true;
+    updateProgress();
+    const ids=empMatch[1].split(',').map(Number);
+    const schuhe=ids.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean).slice(0,4);
+    state.top4=schuhe;
+    const sauberText=antwort.replace(/\[EMPFEHLUNG:[\d,]+\]/,'').trim();
+    if(sauberText) addBot(sauberText);
+    // Ergebniskarten anzeigen
+    setTimeout(()=>{
+      const c=document.getElementById('chat');
+      const grid=document.createElement('div');
+      grid.className='chat-grid';
+      grid.innerHTML=schuhe.map((p,i)=>{
+        const pronLabel=p.pronation==='neutral'?'Neutral':p.pronation==='overpronation'?'Überpronation':'Unterpronation';
+        const gelLabel=p.gelände.charAt(0).toUpperCase()+p.gelände.slice(1);
+        const levelLabel=p.level==='alle'?'Alle Level':p.level.charAt(0).toUpperCase()+p.level.slice(1);
+        return `<div class="chat-card${i===0?' featured':''}" onclick="showDetail(${p.id})">
+          ${i===0?'<span class="cc-badge">⭐ Top-Empfehlung</span>':i===1?'<span class="cc-badge">👍 Sehr geeignet</span>':''}
+          <span style="display:block;font-size:2.3rem;margin-bottom:.4rem;background:${p.color};border-radius:8px;padding:.4rem;text-align:center">${p.emoji}</span>
+          <div class="cc-name">${p.name}</div>
+          <div class="cc-price">${p.price} €</div>
+          <div class="cc-match">${['Perfekter Match','Sehr geeignet','Gute Option','Alternative'][i]}</div>
+          <div class="cc-props">
+            <span class="cc-prop cc-prop-gelände">${gelLabel}</span>
+            <span class="cc-prop cc-prop-level">${levelLabel}</span>
+            <span class="cc-prop cc-prop-pron">${pronLabel}</span>
+          </div>
+        </div>`;
+      }).join('');
+      c.appendChild(grid);
+      requestAnimationFrame(scrollToBottom);
+      setTimeout(()=>{
+        addBot('Klick auf einen Schuh für alle Details oder stell mir weitere Fragen!',[
+          '🔄 Neue Beratung starten',
+          '⚖️ Schuhe vergleichen'
+        ]);
+      },400);
+    },200);
+    return;
+  }
+
+  // Prüfe auf Detail [DETAIL:id]
+  const detailMatch=antwort.match(/\[DETAIL:(\d+)\]/);
+  if(detailMatch){
+    const sauberText=antwort.replace(/\[DETAIL:\d+\]/,'').trim();
+    if(sauberText) addBot(sauberText);
+    showDetail(parseInt(detailMatch[1]));
+    return;
+  }
+
+  // Normale Antwort
+  updateProgress();
+  addBot(antwort);
 }
 
 function sendMsg(){
@@ -349,140 +426,77 @@ function sendMsg(){
   b.value='';b.style.height='';
   removeQR();
   addUser(t);
-  processAnswer(t);
-}
-
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}}
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
-
-function processAnswer(answer){
-  trackInteraktion('antwort');
-  const flow=FLOW[state.step];
-  if(flow) state.answers[flow.key]=answer.toLowerCase();
-  const delay=700+Math.random()*500;
+  trackInteraktion('freitext');
   showTyping();
-  setTimeout(()=>{
+  askClaude(t).then(antwort=>{
     removeTyping();
-    state.step++;
+    parseAndRender(antwort);
+  });
+}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+
+window.handleQR=function(btn,val){
+  removeQR();
+  addUser(val);
+  trackInteraktion('quickreply');
+
+  // Neue Beratung ohne API
+  if(val.toLowerCase().includes('neue beratung')||val.toLowerCase().includes('neu starten')){
+    state={messages:[],selSize:null,top4:[],beratungAbgeschlossen:false};
     updateProgress();
-    if(state.step<FLOW.length){
-      addBot(FLOW[state.step].q,FLOW[state.step].opts);
-    } else {
-      showResults();
-    }
-  },delay);
-}
+    start();
+    return;
+  }
 
-function scoreProduct(p,a){
-  let s=0;
-  const g=a.gelände||'';
-  if(g.includes('straße')&&p.gelände==='straße') s+=4;
-  if(g.includes('trail')&&p.gelände==='trail') s+=4;
-  if(g.includes('wettkampf')&&p.gelände==='wettkampf') s+=4;
-  if(g.includes('flexibel')&&(p.gelände==='straße'||p.gelände==='trail')) s+=2;
-  const l=a.level||'';
-  if(l.includes('anfänger')&&p.level==='anfänger') s+=2;
-  if((l.includes('regelmäßig')||l.includes('gelegentlich'))&&p.level==='alle') s+=1;
-  if((l.includes('fortgeschritten')||l.includes('wettkämpfer'))&&p.level==='fortgeschritten') s+=2;
-  if(l.includes('profi')&&p.level==='profi') s+=3;
-  if(p.level==='alle') s+=1;
-  const pr=a.pronation||'';
-  if(pr.includes('überpronation')&&p.pronation==='overpronation') s+=3;
-  if(pr.includes('unterpronation')&&p.pronation==='supination') s+=3;
-  if(pr.includes('neutral')&&p.pronation==='neutral') s+=2;
-  if(pr.includes('nicht')&&p.pronation==='neutral') s+=1;
-  const b=a.budget||'';
-  if(b.includes('bis 120')&&p.price<=125) s+=2;
-  if(b.includes('120')&&p.price>=120&&p.price<=165) s+=2;
-  if(b.includes('160')&&p.price>=155&&p.price<=205) s+=2;
-  if(b.includes('200')&&p.price>=195) s+=2;
-  const d=a.dämpfung||'';
-  if(d.includes('minimal')&&p.dämpfung==='minimal') s+=3;
-  if(d.includes('mittel')&&p.dämpfung==='mittel') s+=3;
-  if(d.includes('maximal')&&p.dämpfung==='maximal') s+=3;
-  return s;
-}
+  // Vergleich ohne API
+  if(val.toLowerCase().includes('vergleich')){
+    const t=state.top4||[];
+    if(!t.length){addBot('Starte zuerst eine Beratung!',['🔄 Neue Beratung starten']);return;}
+    const medals=['🥇','🥈','🥉','🏅'];
+    const rows=t.map((p,i)=>`${medals[i]} <strong>${p.name}</strong> – ${p.price}€ · ${p.rating}★ · ${p.gelände} · ${p.dämpfung} · ${p.gewicht}`).join('<br><br>');
+    addBot(`Dein persönlicher Vergleich:<br><br>${rows}`);
+    return;
+  }
 
-function showResults(){
-  const scored=PRODUCTS.map(p=>({...p,score:scoreProduct(p,state.answers)})).sort((a,b)=>b.score-a.score);
-  const top4=scored.slice(0,4);
-  state.top4=top4;
-
-  addBot(`Perfekt – ich habe alle deine Angaben ausgewertet! 🎯<br><br>Aus unseren <strong>55 Modellen</strong> habe ich die <strong>4 besten Treffer</strong> für dich gefunden. Meine Topempfehlung: <strong>${top4[0].name}</strong>.`);
-
-  setTimeout(()=>{
-    const c=document.getElementById('chat');
-    const grid=document.createElement('div');
-    grid.className='chat-grid';
-    grid.innerHTML=top4.map((p,i)=>{
-      const pronLabel=p.pronation==='neutral'?'Neutral':p.pronation==='overpronation'?'Überpronation':'Unterpronation';
-      const gelLabel=p.gelände.charAt(0).toUpperCase()+p.gelände.slice(1);
-      const levelLabel=p.level==='alle'?'Alle Level':p.level.charAt(0).toUpperCase()+p.level.slice(1);
-      return `
-      <div class="chat-card${i===0?' featured':''}" onclick="showDetail(${p.id})">
-        ${i===0?'<span class="cc-badge">⭐ Top-Empfehlung</span>':i===1?'<span class="cc-badge">👍 Sehr geeignet</span>':''}
-        <span class="cc-emoji" style="display:block;font-size:2.3rem;margin-bottom:.4rem;background:${p.color};border-radius:8px;padding:.4rem;text-align:center">${p.emoji}</span>
-        <div class="cc-name">${p.name}</div>
-        <div class="cc-price">${p.price} €</div>
-        <div class="cc-match">${['Perfekter Match','Sehr geeignet','Gute Option','Alternative'][i]}</div>
-        <div class="cc-props">
-          <span class="cc-prop cc-prop-gelände">${gelLabel}</span>
-          <span class="cc-prop cc-prop-level">${levelLabel}</span>
-          <span class="cc-prop cc-prop-pron">${pronLabel}</span>
-        </div>
-      </div>`;
-    }).join('');
-    c.appendChild(grid);
-    c.scrollTop=c.scrollHeight;
-
-    setTimeout(()=>{
-      addBot('Klick auf einen Schuh für alle Details, oder frag mich einfach etwas!',[
-        '🔄 Neue Beratung starten',
-        '⚖️ Schuhe vergleichen'
-      ]);
-    },400);
-  },200);
-}
+  showTyping();
+  askClaude(val).then(antwort=>{
+    removeTyping();
+    parseAndRender(antwort);
+  });
+};
 
 function showDetail(id){
   trackInteraktion('detail');
   const p=PRODUCTS.find(x=>x.id===id);
+  if(!p)return;
   state.selSize=null;
   removeQR();
-  addUser(`Zeig mir Details zum ${p.name}`);
-  showTyping();
-  setTimeout(()=>{
-    removeTyping();
-    addBot(`Hier alle Infos zum <strong>${p.name}</strong>:`);
-    const c=document.getElementById('chat');
-    const d=document.createElement('div');
-    d.className='chat-detail';
-    d.innerHTML=`
-      <div class="cd-header">
-        <div class="cd-emoji" style="background:${p.color}">${p.emoji}</div>
-        <div>
-          <div class="cd-name">${p.name}</div>
-          <div class="cd-price">${p.price} €</div>
-          <div class="cd-desc">${p.desc}</div>
-        </div>
+  const c=document.getElementById('chat');
+  const d=document.createElement('div');
+  d.className='chat-detail';
+  d.innerHTML=`
+    <div class="cd-header">
+      <div class="cd-emoji" style="background:${p.color}">${p.emoji}</div>
+      <div>
+        <div class="cd-name">${p.name}</div>
+        <div class="cd-price">${p.price} €</div>
+        <div class="cd-desc">${p.desc}</div>
       </div>
-      <div class="cd-specs">
-        <div class="cd-spec"><div class="cd-spec-label">Gewicht</div><div class="cd-spec-val">${p.gewicht}</div></div>
-        <div class="cd-spec"><div class="cd-spec-label">Sprengung</div><div class="cd-spec-val">${p.sprengung}</div></div>
-        <div class="cd-spec"><div class="cd-spec-label">Dämpfung</div><div class="cd-spec-val">${p.dämpfung}</div></div>
-        <div class="cd-spec"><div class="cd-spec-label">Weite</div><div class="cd-spec-val">${p.weite}</div></div>
-      </div>
-      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.5rem">Größe wählen</div>
-      <div class="cd-sizes">${p.sizes.map(s=>`<button class="cd-size" onclick="selSize(this,${s})">${s}</button>`).join('')}</div>
-      <button class="cd-add" onclick="addCart('${p.name}')">In den Warenkorb legen</button>`;
-    c.appendChild(d);
-    setTimeout(()=>{
-      addBot('Hast du noch Fragen?',[
-        '🔄 Neue Beratung starten'
-      ]);
-    },350);
-    c.scrollTop=c.scrollHeight;
-  },900);
+    </div>
+    <div class="cd-specs">
+      <div class="cd-spec"><div class="cd-spec-label">Gewicht</div><div class="cd-spec-val">${p.gewicht}</div></div>
+      <div class="cd-spec"><div class="cd-spec-label">Sprengung</div><div class="cd-spec-val">${p.sprengung}</div></div>
+      <div class="cd-spec"><div class="cd-spec-label">Dämpfung</div><div class="cd-spec-val">${p.dämpfung}</div></div>
+      <div class="cd-spec"><div class="cd-spec-label">Weite</div><div class="cd-spec-val">${p.weite}</div></div>
+    </div>
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.5rem">Größe wählen</div>
+    <div class="cd-sizes">${p.sizes.map(s=>`<button class="cd-size" onclick="selSize(this,${s})">${s}</button>`).join('')}</div>
+    <button class="cd-add" onclick="addCart('${p.name}')">In den Warenkorb legen</button>`;
+  c.appendChild(d);
+  setTimeout(()=>{addBot('Hast du noch Fragen?',['🔄 Neue Beratung starten']);},350);
+  requestAnimationFrame(scrollToBottom);
 }
 
 function selSize(el,s){
@@ -491,20 +505,14 @@ function selSize(el,s){
 }
 
 function addCart(name){
-  if(!state.selSize){
-    removeQR();
-    addBot('Bitte wähle zuerst eine Größe – klick auf eine der Größen oben! 👆');
-    return;
-  }
+  if(!state.selSize){addBot('Bitte wähle zuerst eine Größe! 👆');return;}
   trackInteraktion('kauf');
   sendTracking(name);
   cartCount++;
   document.getElementById('cart-btn').textContent=`🛒 Warenkorb (${cartCount})`;
   removeQR();
-  addBot(`✅ <strong>${name}</strong> in Größe <strong>${state.selSize}</strong> wurde hinzugefügt!<br>Möchtest du noch etwas stöbern?`,[
-    '🛍️ Mehr Schuhe ansehen',
-    '💳 Zur Kasse',
-    '🔄 Neue Beratung'
+  addBot(`✅ <strong>${name}</strong> in Größe <strong>${state.selSize}</strong> wurde hinzugefügt!`,[
+    '🛍️ Weiter stöbern','🔄 Neue Beratung'
   ]);
   showToast('✓',`${name} (Gr.${state.selSize}) hinzugefügt`);
 }
@@ -517,59 +525,8 @@ function showToast(icon,msg){
   setTimeout(()=>t.remove(),3000);
 }
 
-function handleFollowup(text){
-  removeQR();
-  if(!text)return;
-  addUser(text);
-  showTyping();
-  setTimeout(()=>{
-    removeTyping();
-    const tl=text.toLowerCase();
-    if(tl.includes('neue beratung')||tl.includes('neu')){
-      state={step:0,answers:{},selSize:null};
-      updateProgress();
-      addBot(FLOW[0].q,FLOW[0].opts);
-    } else if(tl.includes('pronation')){
-      addBot('Die <strong>Pronation</strong> beschreibt das Abrollen deines Fußes:<br><br><strong>Neutral</strong> – gleichmäßiges Abrollen (70% aller Läufer)<br><strong>Überpronation</strong> – Fuß kippt nach innen (flache Füße, Knieschmerzen möglich)<br><strong>Supination</strong> – Fuß kippt nach außen (eher selten)<br><br>Tipp: Lass dich in einem Laufladen analysieren!',['Schuhe für Überpronation','Neutrale Schuhe zeigen']);
-    } else if(tl.includes('größe')){
-      addBot('Faustregel für Laufschuhe:<br><br>📐 Fußlänge messen (abends, Füße sind dann am größten)<br>➕ 1,0–1,5 cm Spielraum dazurechnen<br>📏 Beispiel: 26cm Fuß → Größe 41–42<br><br>Beachte: Laufschuhe sitzen etwas weiter als Alltagsschuhe. Welchen Schuh möchtest du ausprobieren?',['Zum Apex Flow 3','Zum CloudStep 9']);
-    } else if(tl.includes('vergleich')){
-      const t=state.top4||[];
-      if(!t.length){
-        addBot('Starte zuerst eine Beratung, damit ich dir deine persönlichen Top-Schuhe vergleichen kann!',['🔄 Neue Beratung starten']);
-      } else {
-        const medals=['🥇','🥈','🥉','🏅'];
-        const pronLabel=p=>p.pronation==='neutral'?'Neutral':p.pronation==='overpronation'?'Überpronation':'Unterpronation';
-        const levelLabel=p=>p.level==='alle'?'Alle Level':p.level.charAt(0).toUpperCase()+p.level.slice(1);
-        const rows=t.map((p,i)=>`${medals[i]} <strong>${p.name}</strong> – ${p.price}€ · ${p.rating}★ · ${p.gelände.charAt(0).toUpperCase()+p.gelände.slice(1)} · ${levelLabel(p)} · ${pronLabel(p)} · Dämpfung: ${p.dämpfung} · ${p.gewicht}`).join('<br><br>');
-        addBot(`Hier dein persönlicher Vergleich der 4 besten Treffer:<br><br>${rows}`);
-      }
-    } else if(tl.includes('kasse')){
-      addBot(`Dein Warenkorb enthält <strong>${cartCount} Artikel</strong>. In dieser Demo endet die Simulation hier – im echten Shop würde es jetzt zur Kasse gehen! 🛒`);
-    } else {
-      // try to find product by name in text
-      const found=PRODUCTS.find(p=>tl.includes(p.name.toLowerCase())||tl.includes(p.brand.toLowerCase()));
-      if(found){showDetail(found.id);}
-      else{addBot('Ich helfe dir gerne! Du kannst auf einen Schuh klicken, nach Kategorien fragen oder einfach schreiben, was du suchst.',['Alle Empfehlungen','🔄 Neue Beratung']);}
-    }
-  },900);
-}
-
-// override addBot to intercept quick-reply clicks for follow-up handling
-const _origQR=window.handleQR;
-window.handleQR=function(btn,val){
-  const step=state.step;
-  removeQR();
-  addUser(val);
-  if(step>=FLOW.length){
-    handleFollowup(val);
-  } else {
-    processAnswer(val);
-  }
-};
-
 function restartChat(){
-  state={step:0,answers:{},selSize:null};
+  state={messages:[],selSize:null,top4:[],beratungAbgeschlossen:false};
   cartCount=0;
   document.getElementById('cart-btn').textContent='🛒 Warenkorb (0)';
   const c=document.getElementById('chat');
@@ -578,9 +535,25 @@ function restartChat(){
   setTimeout(start,300);
 }
 
+function scrollToBottom(){
+  const c=document.getElementById('chat');
+  requestAnimationFrame(scrollToBottom);
+}
+
+// Mobile: Wenn Tastatur aufgeht, nach unten scrollen
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',()=>{
+    scrollToBottom();
+  });
+}
+
 function start(){
   updateProgress();
-  setTimeout(()=>{addBot(FLOW[0].q,FLOW[0].opts)},400);
+  showTyping();
+  askClaude('Begrüße den Kunden kurz und stell die erste Beratungsfrage zum Gelände.').then(antwort=>{
+    removeTyping();
+    addBot(antwort);
+  });
 }
 
 start();
