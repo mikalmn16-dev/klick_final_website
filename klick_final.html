@@ -394,25 +394,6 @@ function sendTracking(schuh){
     gewaehlter_schuh: schuh||'–',
     geraet: getGeraet()
   };
-  gtag('event','kauf_abschluss',{
-    event_category:'Conversion',
-    event_label:schuh||'abgebrochen',
-    value: sek
-  });
-function sendTracking(schuh){
-  if(tracking.gesendet) return;
-  tracking.gesendet=true;
-  const sek=Math.round((Date.now()-tracking.startTime)/1000);
-  const payload={
-    website: 'Klick-Website',
-    completion_time_sek: sek,
-    anzahl_klicks: tracking.klicks,
-    filter_klicks: tracking.filterKlicks,
-    detail_oeffnungen: tracking.detailOeffnungen,
-    erfolg: schuh?'Ja':'Nein',
-    gewaehlter_schuh: schuh||'–',
-    geraet: getGeraet()
-  };
   gtag('event','kauf_abschluss',{event_category:'Conversion',event_label:schuh||'abgebrochen',value:sek});
   fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)}).catch(()=>{});
 }
