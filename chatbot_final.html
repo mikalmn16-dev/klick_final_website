@@ -277,11 +277,37 @@ function sendTracking(schuh){
   const sek=Math.round((Date.now()-tracking.startTime)/1000);
   const payload={website:'Chatbot-Website',completion_time_sek:sek,anzahl_klicks:tracking.interaktionen,filter_klicks:state.messages.length,detail_oeffnungen:'–',erfolg:schuh?'Ja':'Nein',gewaehlter_schuh:schuh||'–',geraet:getGeraet()};
   gtag('event','kauf_abschluss',{event_category:'Conversion',event_label:schuh||'abgebrochen',value:sek});
-  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
-  navigator.sendBeacon(SHEETS_URL,blob);
+function sendTracking(schuh){
+  if(tracking.gesendet)return;
+  tracking.gesendet=true;
+  const sek=Math.round((Date.now()-tracking.startTime)/1000);
+  const payload={website:'Chatbot-Website',completion_time_sek:sek,anzahl_klicks:tracking.interaktionen,filter_klicks:state.messages.length,detail_oeffnungen:'–',erfolg:schuh?'Ja':'Nein',gewaehlter_schuh:schuh||'–',geraet:getGeraet()};
+  gtag('event','kauf_abschluss',{event_category:'Conversion',event_label:schuh||'abgebrochen',value:sek});
+  fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)}).catch(()=>{});
 }
 
 window.addEventListener('beforeunload',()=>{if(!tracking.gesendet)sendTracking(null);});
+
+// Sofort beim Laden tracken
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    fetch(SHEETS_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        website:'Chatbot-Website',
+        completion_time_sek:'–',
+        anzahl_klicks:0,
+        filter_klicks:0,
+        detail_oeffnungen:'–',
+        erfolg:'Seitenaufruf',
+        gewaehlter_schuh:'–',
+        geraet:getGeraet()
+      })
+    }).catch(()=>{});
+  },2000);
+});
 // ─────────────────────────────────────────────────────────
 
 function now(){return new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
