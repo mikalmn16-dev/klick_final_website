@@ -339,28 +339,26 @@ const PROXY_URL='https://script.google.com/macros/s/AKfycby_ApYpvCIdalHY2LJWIlYM
 async function askClaude(userMessage){
   state.messages.push({role:'user',content:userMessage});
   try{
-    const res=await fetch(PROXY_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({
-        claudeRequest:true,
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        system:SYSTEM_PROMPT,
-        messages:state.messages
-      })
+    // Apps Script über doGet aufrufen mit encoded payload
+    const payload=encodeURIComponent(JSON.stringify({
+      claudeRequest:true,
+      model:'claude-sonnet-4-20250514',
+      max_tokens:400,
+      system:SYSTEM_PROMPT,
+      messages:state.messages
+    }));
+    const res=await fetch(PROXY_URL+'?data='+payload,{
+      method:'GET',
+      mode:'cors'
     });
     const text=await res.text();
-    console.log('Proxy Antwort:', text);
-    let data;
-    try{ data=JSON.parse(text); }
-    catch(e){ throw new Error('JSON parse error: '+text.substring(0,200)); }
-    if(data.error) throw new Error(JSON.stringify(data.error));
-    const antwort=data.content?.[0]?.text||'Kein Text in Antwort.';
+    console.log('Antwort:', text);
+    const data=JSON.parse(text);
+    const antwort=data.content?.[0]?.text||'Kein Text.';
     state.messages.push({role:'assistant',content:antwort});
     return antwort;
   }catch(e){
-    console.error('askClaude Fehler:',e);
+    console.error('Fehler:',e);
     const fallback='Entschuldigung, die KI ist gerade nicht erreichbar. ('+e.message+')';
     state.messages.push({role:'assistant',content:fallback});
     return fallback;
